@@ -1,12 +1,35 @@
 # condition.py
 import uuid
 import time
+import json
+import os
 from typing import Callable
+
+CONDITION_FILE = "conditions_data.json"
 
 class ConditionManager:
     def __init__(self, place_order_fn: Callable):
         self.place_order = place_order_fn
         self.conditions: dict = {}
+        self._load()
+
+    def _load(self):
+        if os.path.exists(CONDITION_FILE):
+            try:
+                with open(CONDITION_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                self.conditions = {item["id"]: item for item in data}
+                print(f"[条件单] 已加载 {len(self.conditions)} 条")
+            except Exception as e:
+                print(f"[条件单] 加载失败: {e}")
+                self.conditions = {}
+
+    def _save(self):
+        try:
+            with open(CONDITION_FILE, "w", encoding="utf-8") as f:
+                json.dump(list(self.conditions.values()), f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[条件单] 保存失败: {e}")
 
     def add(self, body: dict) -> dict:
         cid = str(uuid.uuid4())[:8]
@@ -16,19 +39,22 @@ class ConditionManager:
             "op":           body["op"],
             "price":        float(body["price"]),
             "action":       body["action"],
-            "etf_code":     body["etf_code"],
+            "etf_code":     body.get("etf_code", ""),
+            "etf_name":     body.get("etf_name", ""),
             "qty":          int(body["qty"]),
             "active":       True,
             "triggered":    False,
             "trigger_time": None,
             "created_at":   int(time.time()),
         }
+        self._save()
         print(f"[条件单] 新增 {cid}: {body['index_code']} {body['op']} {body['price']}")
         return self.conditions[cid]
 
     def remove(self, cid: str) -> dict:
         if cid in self.conditions:
             del self.conditions[cid]
+            self._save()
             return {"success": True, "msg": f"已删除 {cid}"}
         return {"success": False, "msg": "条件单不存在"}
 
@@ -59,6 +85,7 @@ class ConditionManager:
                 self.conditions[cid]["triggered"]    = True
                 self.conditions[cid]["trigger_time"] = int(time.time())
                 self.conditions[cid]["order_result"] = result
+                self._save()
                 newly_triggered.append({**cond, "current_price": current_price, "order_result": result})
 
         return newly_triggered

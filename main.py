@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from qmt_bridge import (
     get_all_indices, place_order, get_positions,
     search_stock, get_stock_tick, get_stock_ticks,
+    get_kline,
 )
 from condition import ConditionManager
 from volume_condition import VolumeConditionManager
@@ -143,3 +144,11 @@ def api_stock_tick(code: str):
 @app.get("/stock-tick")
 def api_stock_tick_query(code: str = ""):
     return get_stock_tick(code)
+# ─── import 行里加上 get_kline ────────────────────────────────────
+# from qmt_bridge import (
+#     ..., get_kline,   # ← 加这个
+# )
+
+@app.get("/kline")
+def api_kline(code: str = "", period: str = "1d", count: int = 60):
+    return get_kline(code, period, count)
