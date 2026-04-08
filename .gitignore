@@ -1,3 +1,6 @@
-venv/
+path/
+conditions_data.json
+volume_conditions_data.json
 __pycache__/
 *.pyc
+venv/
