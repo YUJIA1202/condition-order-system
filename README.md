@@ -20,7 +20,7 @@
 1. 安装依赖：`pip install -r requirements.txt`
 2. 配置 `qmt_bridge.py` 中的账号与QMT路径
 3. 确保国金证券QMT客户端已启动
-4. 启动服务：`uvicorn main:app --reload`
+4. 启动服务先进虚拟环境再：`uvicorn main:app --reload`
 
 ## 相关仓库
 
