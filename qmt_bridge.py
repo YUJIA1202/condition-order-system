@@ -356,22 +356,28 @@ def place_order(code: str, action: str, qty: int) -> dict:
             "msg":      f"模拟{action} {code} {qty}手 成功",
         }
     try:
-        from xtquant.xttrader import XtQuantTrader
+        from xtquant.xttrader import XtQuantTrader, _XTTYPE_
         from xtquant import xtconstant
+
         trader = XtQuantTrader(
             r"C:\Users\86182\Desktop\etf-desk\国金证券QMT交易端\userdata_mini",
             int(time.time())
         )
         trader.start()
-        account = trader.get_account(ACCOUNT_ID)
+        trader.connect()
+
+        acc        = _XTTYPE_.StockAccount(ACCOUNT_ID)
         direction  = xtconstant.STOCK_BUY if action == "buy" else xtconstant.STOCK_SELL
         price_type = xtconstant.FIX_PRICE
+
         tick  = get_stock_tick(code)
         price = tick["price"]
+
         order_id = trader.order_stock(
-            account, code, direction, qty, price_type, price,
-            "ETF-DESK", "量能条件单自动下单"
+            acc, code, direction, qty, price_type, price,
+            "ETF-DESK", "条件单自动下单"
         )
+        trader.stop()
         return {
             "success":  order_id > 0,
             "order_id": str(order_id),
@@ -380,7 +386,6 @@ def place_order(code: str, action: str, qty: int) -> dict:
     except Exception as e:
         print(f"[QMT] place_order 失败: {e}")
         return {"success": False, "order_id": "", "msg": str(e)}
-
 
 # ─── 查持仓 ───────────────────────────────────────────────────────
 def get_positions() -> list:
