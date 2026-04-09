@@ -486,3 +486,53 @@ def _mock_kline(code: str, period: str = "1d", count: int = 60) -> list:
         bars.append({"t": ts, "o": o, "h": h, "l": l, "c": c, "v": v})
         price = c
     return bars
+# ─── 板块ETF数据 ──────────────────────────────────────────────────
+SECTOR_ETFS = [
+    {"code": "512000.SH", "name": "券商"},
+    {"code": "512800.SH", "name": "银行"},
+    {"code": "512480.SH", "name": "半导体"},
+    {"code": "512010.SH", "name": "医药"},
+    {"code": "512660.SH", "name": "军工"},
+    {"code": "516160.SH", "name": "新能源"},
+    {"code": "512690.SH", "name": "白酒"},
+    {"code": "159928.SZ", "name": "消费"},
+    {"code": "512400.SH", "name": "有色"},
+    {"code": "515220.SH", "name": "煤炭"},
+    {"code": "516210.SH", "name": "钢铁"},
+    {"code": "512200.SH", "name": "地产"},
+]
+
+def get_sectors() -> list:
+    if USE_MOCK:
+        return _mock_sectors()
+    try:
+        xtdata = _get_xtdata()
+        codes  = [s["code"] for s in SECTOR_ETFS]
+        data   = xtdata.get_full_tick(codes)
+        result = []
+        for s in SECTOR_ETFS:
+            tick = data.get(s["code"], {})
+            if not tick:
+                result.append({"code": s["code"], "name": s["name"], "change": 0.0, "price": 0.0})
+                continue
+            price      = tick.get("lastPrice", 0)
+            last_close = tick.get("lastClose", 0) or 1
+            change     = round((price - last_close) / last_close * 100, 2)
+            result.append({
+                "code":   s["code"],
+                "name":   s["name"],
+                "change": change,
+                "price":  round(price, 3),
+            })
+        return result
+    except Exception as e:
+        print(f"[QMT] get_sectors 失败: {e}")
+        return _mock_sectors()
+
+def _mock_sectors() -> list:
+    import math
+    result = []
+    for i, s in enumerate(SECTOR_ETFS):
+        chg = round(math.sin(i * 0.8 + time.time() * 0.001) * 2.5, 2)
+        result.append({"code": s["code"], "name": s["name"], "change": chg, "price": 1.0})
+    return result
