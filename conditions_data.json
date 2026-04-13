@@ -1,16 +1,1 @@
-[
-  {
-    "id": "b27eb686",
-    "index_code": "000001.SH",
-    "op": "gte",
-    "price": 4020.0,
-    "action": "sell",
-    "etf_code": "159606.SZ",
-    "etf_name": "中证500成长ETF易方达",
-    "qty": 73,
-    "active": true,
-    "triggered": false,
-    "trigger_time": null,
-    "created_at": 1775690318
-  }
-]
+[]

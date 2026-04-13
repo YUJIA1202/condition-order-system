@@ -1,0 +1,31 @@
+{
+  "516670": {
+    "buy_date": "2026-04-13",
+    "trades": [
+      {"date": "2026-04-13", "action": "buy", "price": 0.674, "qty": 20000}
+    ]
+  },
+  "600089": {
+    "buy_date": "2026-04-13",
+    "trades": [
+      {"date": "2026-04-13", "action": "buy", "price": 26.751, "qty": 500}
+    ]
+  },
+  "159606": {
+    "buy_date": "2026-03-17",
+    "trades": [
+      {"date": "2026-03-17", "action": "buy",  "price": 1.2330, "qty": 12200},
+      {"date": "2026-03-19", "action": "buy",  "price": 1.2100, "qty": 8400},
+      {"date": "2026-03-19", "action": "buy",  "price": 1.2090, "qty": 3600},
+      {"date": "2026-03-24", "action": "sell", "price": 1.1650, "qty": 8000},
+      {"date": "2026-03-25", "action": "sell", "price": 1.1920, "qty": 8100},
+      {"date": "2026-03-26", "action": "buy",  "price": 1.1910, "qty": 8400},
+      {"date": "2026-04-01", "action": "sell", "price": 1.1960, "qty": 2000},
+      {"date": "2026-04-02", "action": "sell", "price": 1.1960, "qty": 7200},
+      {"date": "2026-04-02", "action": "buy",  "price": 1.1850, "qty": 1800},
+      {"date": "2026-04-03", "action": "buy",  "price": 1.1780, "qty": 5400},
+      {"date": "2026-04-08", "action": "sell", "price": 1.2210, "qty": 7200},
+      {"date": "2026-04-13", "action": "buy",  "price": 1.2310, "qty": 10000}
+    ]
+  }
+}
