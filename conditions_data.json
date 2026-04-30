@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": "75a55cf1",
+    "index_code": "000001.SH",
+    "op": "lte",
+    "price": 3962.0,
+    "action": "buy",
+    "etf_code": "159606.SZ",
+    "etf_name": "中证500成长ETF易方达",
+    "qty": 80,
+    "active": true,
+    "triggered": false,
+    "trigger_time": null,
+    "created_at": 1776115116
+  },
+  {
+    "id": "2272a0bf",
+    "index_code": "000001.SH",
+    "op": "gte",
+    "price": 4055.0,
+    "action": "sell",
+    "etf_code": "516670.SH",
+    "etf_name": "畜牧养殖ETF招商",
+    "qty": 100,
+    "active": true,
+    "triggered": true,
+    "trigger_time": 1776321087,
+    "created_at": 1776293138,
+    "order_result": {
+      "success": true,
+      "order_id": "1090646231",
+      "msg": "sell 516670.SH 100 @ 0.706"
+    }
+  },
+  {
+    "id": "3c406559",
+    "index_code": "000001.SH",
+    "op": "gte",
+    "price": 4055.0,
+    "action": "sell",
+    "etf_code": "159606.SZ",
+    "etf_name": "中证500成长ETF易方达",
+    "qty": 43,
+    "active": true,
+    "triggered": true,
+    "trigger_time": 1776321090,
+    "created_at": 1776293207,
+    "order_result": {
+      "success": false,
+      "order_id": "-1",
+      "msg": "sell 159606.SZ 43 @ 1.267"
+    }
+  }
+]

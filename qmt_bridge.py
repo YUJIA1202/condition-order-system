@@ -109,7 +109,7 @@ def search_stock(keyword: str) -> list:
                 print(f"[QMT] search_instruments failed: {e}")
 
         all_codes = []
-        for sector in ["\u6caa\u6df1A\u80a1", "\u4e0a\u4ea4\u6240ETF", "\u6df1\u4ea4\u6240ETF", "\u6caa\u6df1ETF"]:
+        for sector in ["沪深A股", "上交所ETF", "深交所ETF", "沪深ETF"]:
             try:
                 codes = xtdata.get_stock_list_in_sector(sector)
                 if codes:
@@ -221,22 +221,24 @@ def place_order(code: str, action: str, qty: int) -> dict:
         from xtquant import xtconstant
         trader = XtQuantTrader(
             r"C:\Users\86182\Desktop\etf-desk\国金证券QMT交易端\userdata_mini",
-            int(time.time())
+            9999
         )
         trader.start()
         trader.connect()
-        acc        = _XTTYPE_.StockAccount(ACCOUNT_ID)
-        direction  = xtconstant.STOCK_BUY if action == "buy" else xtconstant.STOCK_SELL
+        time.sleep(2)  # 等待连接建立
+        acc       = _XTTYPE_.StockAccount(ACCOUNT_ID)
+        direction = xtconstant.STOCK_BUY if action == "buy" else xtconstant.STOCK_SELL
         price_type = xtconstant.FIX_PRICE
         tick = get_stock_tick(code)
         if not tick:
             return {"success": False, "order_id": "", "msg": f"failed to get price for {code}"}
-        price = tick["price"]
+        price    = tick["price"]
         order_id = trader.order_stock(
             acc, code, direction, qty * 100, price_type, price,
             "ETF-DESK", "auto order"
         )
         trader.stop()
+        print(f"[QMT] place_order {action} {code} {qty}手 @ {price} -> order_id={order_id}")
         return {
             "success":  order_id > 0,
             "order_id": str(order_id),
@@ -251,10 +253,11 @@ def get_positions() -> list:
         from xtquant.xttrader import XtQuantTrader, _XTTYPE_
         trader = XtQuantTrader(
             r"C:\Users\86182\Desktop\etf-desk\国金证券QMT交易端\userdata_mini",
-            int(time.time())
+            9999
         )
         trader.start()
         trader.connect()
+        time.sleep(2)  # 等待连接建立
         acc = _XTTYPE_.StockAccount(ACCOUNT_ID)
         positions = trader.query_stock_positions(acc)
         result = []
@@ -310,18 +313,18 @@ def get_kline(code: str, period: str = "1d", count: int = 60) -> list:
         return []
 
 SECTOR_ETFS = [
-    {"code": "512000.SH", "name": "\u5238\u5546"},
-    {"code": "512800.SH", "name": "\u9280\u884c"},
-    {"code": "512480.SH", "name": "\u534a\u5bfc\u4f53"},
-    {"code": "512010.SH", "name": "\u533b\u836f"},
-    {"code": "512660.SH", "name": "\u519b\u5de5"},
-    {"code": "516160.SH", "name": "\u65b0\u80fd\u6e90"},
-    {"code": "512690.SH", "name": "\u767d\u9152"},
-    {"code": "159928.SZ", "name": "\u6d88\u8d39"},
-    {"code": "512400.SH", "name": "\u6709\u8272"},
-    {"code": "515220.SH", "name": "\u717d\u70ad"},
-    {"code": "516210.SH", "name": "\u9493\u94a2"},
-    {"code": "512200.SH", "name": "\u5730\u4ea7"},
+    {"code": "512000.SH", "name": "券商"},
+    {"code": "512800.SH", "name": "银行"},
+    {"code": "512480.SH", "name": "半导体"},
+    {"code": "512010.SH", "name": "医药"},
+    {"code": "512660.SH", "name": "军工"},
+    {"code": "516160.SH", "name": "新能源"},
+    {"code": "512690.SH", "name": "白酒"},
+    {"code": "159928.SZ", "name": "消费"},
+    {"code": "512400.SH", "name": "有色"},
+    {"code": "515220.SH", "name": "煤炭"},
+    {"code": "516210.SH", "name": "钢铁"},
+    {"code": "512200.SH", "name": "地产"},
 ]
 
 def get_sectors() -> list:
@@ -354,10 +357,11 @@ def get_history_pnl(days: int = 365) -> list:
         from xtquant.xttrader import XtQuantTrader, _XTTYPE_
         trader = XtQuantTrader(
             r"C:\Users\86182\Desktop\etf-desk\国金证券QMT交易端\userdata_mini",
-            int(time.time()) + 9999
+            9999
         )
         trader.start()
         trader.connect()
+        time.sleep(2)  # 等待连接建立
         acc = _XTTYPE_.StockAccount(ACCOUNT_ID)
         raw_positions = trader.query_stock_positions(acc)
         positions = []
@@ -380,7 +384,6 @@ def get_history_pnl(days: int = 365) -> list:
             print(f"[DEBUG history-pnl] {pos['code']} bars: {len(bars)}")
             for i, bar in enumerate(bars):
                 date = datetime.fromtimestamp(bar["t"]).strftime("%Y-%m-%d")
-                # 真实每日盈亏 = (当日收盘 - 前日收盘) * 持仓量
                 prev_close = bars[i-1]["c"] if i > 0 else bar["o"]
                 daily_pnl  = round((bar["c"] - prev_close) * pos["qty"], 2)
                 if date not in result_map:

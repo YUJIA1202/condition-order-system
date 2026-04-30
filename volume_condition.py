@@ -11,7 +11,7 @@ VOLUME_CONDITION_FILE = "volume_conditions_data.json"
 
 def _is_trading_time() -> bool:
     now = datetime.now()
-    if now.weekday() >= 5:  # 周六周日
+    if now.weekday() >= 5:
         return False
     t = now.hour * 100 + now.minute
     return (925 <= t <= 1130) or (1300 <= t <= 1500)
@@ -82,7 +82,7 @@ class VolumeConditionManager:
 
     def check(self, stock_ticks: dict) -> list:
         if not _is_trading_time():
-            return []  # 非交易时段不触发
+            return []
 
         events = []
 
@@ -94,12 +94,11 @@ class VolumeConditionManager:
             if tick is None:
                 continue
 
-            price     = tick["price"]
-            vwap      = tick["vwap"]
+            price = tick["price"]
+            vwap = tick["vwap"]
             vol_ratio = tick["vol_ratio"]
-            change    = tick["change"]
+            change = tick["change"]
 
-            # 第一步：价格是否到达触发位
             hit = False
             if cond["op"] == "lte" and price <= cond["trigger_price"]:
                 hit = True
@@ -108,15 +107,13 @@ class VolumeConditionManager:
             if not hit:
                 continue
 
-            # 第二步：量能过滤
-            vol_thr  = cond["vol_ratio_threshold"]
+            vol_thr = cond["vol_ratio_threshold"]
             vwap_thr = cond["vwap_dev_threshold"] / 100
-
             vwap_dev = (price - vwap) / vwap if vwap > 0 else 0
 
-            is_rising        = change >= 0
-            is_heavy         = vol_ratio >= vol_thr
-            is_light         = vol_ratio < vol_thr
+            is_rising = change >= 0
+            is_heavy = vol_ratio >= vol_thr
+            is_light = vol_ratio < vol_thr
             price_above_vwap = vwap_dev >= vwap_thr
             price_below_vwap = vwap_dev <= -vwap_thr
 
@@ -138,7 +135,6 @@ class VolumeConditionManager:
                             f"价格拉升但均价线未跟随（偏离{vwap_dev*100:.1f}%≥{cond['vwap_dev_threshold']}%）"
                             f"，量比{vol_ratio}x，取消买入"
                         )
-
             elif cond["action"] == "sell":
                 if is_rising:
                     if is_heavy and price_above_vwap:
@@ -155,37 +151,37 @@ class VolumeConditionManager:
                             f"，判断为震荡，取消卖出"
                         )
 
-            # 第三步：执行
             now = int(time.time())
 
             if cancel:
-                self.conditions[cid]["status"]        = "cancelled"
+                self.conditions[cid]["status"] = "cancelled"
                 self.conditions[cid]["cancel_reason"] = cancel_reason
-                self.conditions[cid]["trigger_time"]  = now
+                self.conditions[cid]["trigger_time"] = now
                 self._save()
                 print(f"[量能取消] {cid} | {cancel_reason}")
                 events.append({
                     **cond,
-                    "status":        "cancelled",
+                    "status": "cancelled",
                     "cancel_reason": cancel_reason,
                     "current_price": price,
-                    "vwap":          vwap,
-                    "vol_ratio":     vol_ratio,
+                    "vwap": vwap,
+                    "vol_ratio": vol_ratio,
                 })
             else:
                 result = self.place_order(cond["stock_code"], cond["action"], cond["qty"])
-                self.conditions[cid]["status"]       = "triggered"
+                self.conditions[cid]["status"] = "triggered"
                 self.conditions[cid]["trigger_time"] = now
                 self.conditions[cid]["order_result"] = result
                 self._save()
                 print(f"[量能触发] {cid} | {cond['action']} {cond['stock_code']} {cond['qty']}手 | 量比{vol_ratio} 偏离{vwap_dev*100:.1f}%")
+                print(f"[量能下单结果] {cid} | success={result.get('success')} | order_id={result.get('order_id')} | msg={result.get('msg')}")
                 events.append({
                     **cond,
-                    "status":        "triggered",
+                    "status": "triggered",
                     "current_price": price,
-                    "vwap":          vwap,
-                    "vol_ratio":     vol_ratio,
-                    "order_result":  result,
+                    "vwap": vwap,
+                    "vol_ratio": vol_ratio,
+                    "order_result": result,
                 })
 
         return events
